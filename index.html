@@ -1,0 +1,438 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Study">
+<title>Study</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Mono:wght@300;400;500&display=swap');
+:root {
+  --forest:#2d5a27;--moss:#4a7c3f;--leaf:#6fa651;--canopy:#a8d08d;
+  --soil:#0e1209;--paper:#f0ebe0;--dim:rgba(168,208,141,0.4);
+}
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+body{background:var(--soil);color:var(--paper);font-family:'DM Mono',monospace;min-height:100dvh;overflow-x:hidden;}
+.bg{position:fixed;inset:0;z-index:0;overflow:hidden;background:radial-gradient(ellipse at 50% -10%,#1e3d18 0%,#0a1208 55%,var(--soil) 100%);}
+.tree{position:absolute;bottom:0;background:#070b05;}
+.t1{left:-3%;width:20%;height:48%;clip-path:polygon(50% 0%,12% 42%,24% 42%,4% 68%,20% 68%,0% 100%,100% 100%,80% 68%,96% 68%,76% 42%,88% 42%);}
+.t2{right:-4%;width:24%;height:56%;clip-path:polygon(50% 0%,15% 40%,26% 40%,6% 66%,21% 66%,0% 100%,100% 100%,79% 66%,94% 66%,74% 40%,85% 40%);}
+.t3{left:12%;width:13%;height:34%;clip-path:polygon(50% 0%,18% 44%,29% 44%,8% 70%,24% 70%,0% 100%,100% 100%,76% 70%,92% 70%,71% 44%,82% 44%);opacity:.45;}
+.t4{right:16%;width:16%;height:40%;clip-path:polygon(50% 0%,16% 41%,27% 41%,5% 67%,22% 67%,0% 100%,100% 100%,78% 67%,95% 67%,73% 41%,84% 41%);opacity:.55;}
+.page{position:relative;z-index:10;min-height:100dvh;display:flex;flex-direction:column;padding:0 20px max(32px,env(safe-area-inset-bottom,16px));}
+/* HEADER */
+.header{padding-top:max(52px,env(safe-area-inset-top,24px));text-align:center;animation:fadeDown .7s ease both;}
+@keyframes fadeDown{from{opacity:0;transform:translateY(-14px)}to{opacity:1;transform:translateY(0)}}
+.eyebrow{font-size:9px;letter-spacing:4px;text-transform:uppercase;color:var(--canopy);opacity:.6;margin-bottom:5px;}
+.title{font-family:'DM Serif Display',serif;font-size:clamp(28px,8vw,42px);line-height:1.05;}
+.title em{color:var(--canopy);font-style:italic;}
+/* NAV */
+.nav{display:flex;gap:8px;margin:16px 0 0;animation:fadeDown .7s .05s ease both;}
+.nav a{flex:1;text-align:center;padding:9px;border:1px solid rgba(168,208,141,.15);border-radius:10px;font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--canopy);text-decoration:none;transition:all .2s;}
+.nav a.active{background:rgba(74,124,63,.2);border-color:rgba(168,208,141,.35);}
+.nav a:active{transform:scale(.97);}
+/* VIDEO TRACKER */
+.tracker{margin:16px 0 0;background:rgba(255,255,255,.03);border:1px solid rgba(168,208,141,.1);border-radius:18px;padding:16px;animation:fadeUp .7s .1s ease both;}
+@keyframes fadeUp{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:translateY(0)}}
+.tracker-row{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:10px;gap:8px;}
+.tracker-left{flex:1;}
+.tracker-label{font-size:9px;letter-spacing:3px;text-transform:uppercase;color:var(--canopy);opacity:.5;margin-bottom:4px;}
+.video-num{font-family:'DM Serif Display',serif;font-size:15px;color:var(--canopy);}
+.video-title{font-size:10px;color:var(--paper);opacity:.55;line-height:1.35;margin-top:3px;}
+.open-btn{flex-shrink:0;background:linear-gradient(135deg,var(--forest),var(--moss));border:1px solid rgba(168,208,141,.3);border-radius:10px;color:var(--paper);font-family:'DM Mono',monospace;font-size:10px;letter-spacing:1px;padding:8px 12px;cursor:pointer;white-space:nowrap;transition:all .2s;text-decoration:none;display:flex;align-items:center;gap:5px;}
+.open-btn:active{transform:scale(.96);}
+.bar{height:3px;background:rgba(255,255,255,.07);border-radius:2px;overflow:hidden;margin-bottom:10px;}
+.bar-fill{height:100%;background:linear-gradient(90deg,var(--moss),var(--canopy));border-radius:2px;transition:width .4s ease;}
+.phase{font-size:10px;color:var(--paper);opacity:.4;}
+.vid-btns{display:flex;gap:8px;margin-top:12px;}
+.vid-btn{flex:1;background:none;border:1px solid rgba(168,208,141,.15);border-radius:8px;color:var(--canopy);font-family:'DM Mono',monospace;font-size:10px;letter-spacing:1px;padding:9px 4px;cursor:pointer;transition:all .2s;}
+.vid-btn:active{background:rgba(168,208,141,.08);transform:scale(.97);}
+/* CHECKLIST */
+.section-label{font-size:9px;letter-spacing:3px;text-transform:uppercase;color:var(--canopy);opacity:.4;margin:18px 0 9px;}
+.checklist{display:flex;flex-direction:column;gap:7px;animation:fadeUp .7s .15s ease both;}
+.item{display:flex;align-items:flex-start;gap:12px;background:rgba(255,255,255,.02);border:1px solid rgba(168,208,141,.07);border-radius:12px;padding:11px 13px;cursor:pointer;transition:all .2s;-webkit-user-select:none;user-select:none;}
+.item.done{background:rgba(74,124,63,.1);border-color:rgba(168,208,141,.2);}
+.item:active{transform:scale(.98);}
+.box{width:20px;height:20px;border:1.5px solid rgba(168,208,141,.25);border-radius:6px;flex-shrink:0;display:flex;align-items:center;justify-content:center;margin-top:1px;transition:all .25s;}
+.item.done .box{background:var(--leaf);border-color:var(--leaf);}
+.ck{display:none;color:#fff;font-size:12px;font-weight:600;}
+.item.done .ck{display:block;}
+.item-text{flex:1;}
+.item-title{font-size:12.5px;color:var(--paper);margin-bottom:2px;transition:opacity .2s;}
+.item.done .item-title{opacity:.3;text-decoration:line-through;text-decoration-color:var(--leaf);}
+.item-desc{font-size:10px;color:var(--canopy);opacity:.4;line-height:1.45;}
+/* FOREST */
+.forest-card{margin:15px 0 0;background:linear-gradient(135deg,rgba(45,90,39,.25),rgba(10,18,8,.2));border:1px solid rgba(111,166,81,.2);border-radius:16px;padding:15px;display:flex;align-items:center;gap:14px;cursor:pointer;transition:all .2s;text-decoration:none;-webkit-user-select:none;animation:fadeUp .7s .2s ease both;}
+.forest-card:active{transform:scale(.98);}
+.tree-icon{font-size:36px;animation:sway 4s ease-in-out infinite;}
+@keyframes sway{0%,100%{transform:rotate(-3deg)}50%{transform:rotate(3deg)}}
+.forest-text{flex:1;}
+.forest-title{font-family:'DM Serif Display',serif;font-size:17px;color:var(--canopy);margin-bottom:3px;}
+.forest-sub{font-size:10px;color:var(--canopy);opacity:.45;line-height:1.4;}
+.forest-arr{color:var(--canopy);opacity:.35;font-size:20px;}
+/* PROGRESS RING */
+.ring-wrap{display:flex;align-items:center;gap:10px;margin:14px 0 0;padding:12px 14px;background:rgba(255,255,255,.02);border:1px solid rgba(168,208,141,.07);border-radius:12px;animation:fadeUp .7s .22s ease both;}
+.ring-svg{flex-shrink:0;}
+.ring-bg{stroke:rgba(255,255,255,.08);fill:none;}
+.ring-fg{stroke:var(--leaf);fill:none;stroke-linecap:round;transition:stroke-dashoffset .5s ease;transform:rotate(-90deg);transform-origin:50% 50%;}
+.ring-label{font-size:10px;color:var(--paper);opacity:.5;line-height:1.5;}
+.ring-label strong{font-size:12px;color:var(--canopy);display:block;opacity:1;}
+/* CTA */
+.cta{margin-top:auto;padding-top:16px;animation:fadeUp .7s .25s ease both;}
+.btn{display:block;width:100%;background:linear-gradient(135deg,var(--forest),var(--moss));border:1px solid rgba(168,208,141,.28);border-radius:16px;color:var(--paper);font-family:'DM Mono',monospace;font-size:13px;letter-spacing:2px;text-transform:uppercase;padding:17px;cursor:pointer;text-align:center;text-decoration:none;transition:all .2s;box-shadow:0 8px 28px rgba(45,90,39,.35);}
+.btn:active{transform:scale(.98);}
+.btn.ready{animation:pulse 2s ease-in-out infinite;}
+@keyframes pulse{0%,100%{box-shadow:0 8px 28px rgba(45,90,39,.35)}50%{box-shadow:0 8px 44px rgba(111,166,81,.55)}}
+.hint{text-align:center;font-size:9px;color:var(--canopy);opacity:.28;letter-spacing:1px;margin-top:9px;}
+.reset{display:block;text-align:center;margin-top:12px;font-size:9px;color:var(--canopy);opacity:.22;cursor:pointer;letter-spacing:1px;}
+/* TOAST */
+.toast{position:fixed;bottom:max(32px,env(safe-area-inset-bottom,16px));left:50%;transform:translateX(-50%) translateY(70px);background:#1a2e14;border:1px solid var(--leaf);border-radius:100px;padding:10px 20px;font-size:11px;letter-spacing:1px;color:var(--canopy);white-space:nowrap;transition:transform .3s ease;z-index:100;}
+.toast.show{transform:translateX(-50%) translateY(0);}
+</style>
+</head>
+<body>
+<div class="bg">
+  <div class="tree t1"></div><div class="tree t2"></div>
+  <div class="tree t3"></div><div class="tree t4"></div>
+</div>
+
+<div class="page">
+  <div class="header">
+    <div class="eyebrow">Pre-Calc · Summer 2026</div>
+    <div class="title">Prof. <em>Leonard</em></div>
+  </div>
+
+  <nav class="nav">
+    <a href="index.html" class="active">Session</a>
+    <a href="schedule.html">Schedule</a>
+  </nav>
+
+  <!-- VIDEO TRACKER -->
+  <div class="tracker">
+    <div class="tracker-row">
+      <div class="tracker-left">
+        <div class="tracker-label">Now Studying</div>
+        <div class="video-num" id="videoDisplay">Video 1 of 115</div>
+        <div class="video-title" id="videoTitle">Intro to Precalculus</div>
+      </div>
+      <a class="open-btn" id="openBtn" href="#" onclick="openVideo(event)">▶ Open</a>
+    </div>
+    <div class="bar"><div class="bar-fill" id="barFill" style="width:.9%"></div></div>
+    <div class="phase" id="phase">📐 College Algebra · Videos 1–73</div>
+    <div class="vid-btns">
+      <button class="vid-btn" onclick="changeVideo(-1)">← Previous</button>
+      <button class="vid-btn" onclick="changeVideo(1)">Mark Done · Next →</button>
+    </div>
+  </div>
+
+  <!-- CHECKLIST (per-video) -->
+  <div class="section-label">Session checklist · <span id="checkLabel">Video 1</span></div>
+  <div class="checklist" id="checklist">
+    <div class="item" data-key="forest" onclick="toggle(this)">
+      <div class="box"><span class="ck">✓</span></div>
+      <div class="item-text">
+        <div class="item-title">🌲 Forest tree planted</div>
+        <div class="item-desc">Start a 45–60 min session before touching YouTube</div>
+      </div>
+    </div>
+    <div class="item" data-key="note" onclick="toggle(this)">
+      <div class="box"><span class="ck">✓</span></div>
+      <div class="item-text">
+        <div class="item-title">📓 Obsidian note open</div>
+        <div class="item-desc">New note titled with this video's topic</div>
+      </div>
+    </div>
+    <div class="item" data-key="paper" onclick="toggle(this)">
+      <div class="box"><span class="ck">✓</span></div>
+      <div class="item-text">
+        <div class="item-title">✏️ Pencil & paper ready</div>
+        <div class="item-desc">Work every example by hand as Leonard does it</div>
+      </div>
+    </div>
+    <div class="item" data-key="distract" onclick="toggle(this)">
+      <div class="box"><span class="ck">✓</span></div>
+      <div class="item-text">
+        <div class="item-title">🔕 Distractions off</div>
+        <div class="item-desc">Screen Time on, notifications silenced</div>
+      </div>
+    </div>
+    <div class="item" data-key="recall" onclick="toggle(this)">
+      <div class="box"><span class="ck">✓</span></div>
+      <div class="item-text">
+        <div class="item-title">🧠 Recall goal set</div>
+        <div class="item-desc">After video: explain the concept from memory, no notes</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- OVERALL PROGRESS RING -->
+  <div class="ring-wrap">
+    <svg class="ring-svg" width="44" height="44" viewBox="0 0 44 44">
+      <circle class="ring-bg" cx="22" cy="22" r="18" stroke-width="3"/>
+      <circle class="ring-fg" id="ringFg" cx="22" cy="22" r="18" stroke-width="3"
+        stroke-dasharray="113.1" stroke-dashoffset="113.1"/>
+    </svg>
+    <div class="ring-label">
+      <strong id="ringPct">0%</strong>
+      course complete · <span id="ringVids">0 of 115 videos</span>
+    </div>
+  </div>
+
+  <!-- FOREST NUDGE -->
+  <a class="forest-card" href="forest://">
+    <div class="tree-icon">🌳</div>
+    <div class="forest-text">
+      <div class="forest-title">Open Forest</div>
+      <div class="forest-sub">Plant first. The playlist can wait 60 seconds.</div>
+    </div>
+    <div class="forest-arr">›</div>
+  </a>
+
+  <div class="cta">
+    <a class="btn" id="playlistBtn" href="youtube://www.youtube.com/playlist?list=PLDesaqWTN6ESsmwELdrzhcGiRhk5DjwLP">
+      Open Full Playlist ↗
+    </a>
+    <div class="hint" id="hint">check all boxes to unlock this video's session</div>
+    <span class="reset" onclick="resetSession()">reset this session's checkboxes</span>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// All 115 video titles
+const VIDEOS = [
+  "Intro to Precalculus",
+  "Introduction to Functions",
+  "How to Evaluate Functions",
+  "Finding the Domain of Functions",
+  "Operations of Functions",
+  "Using the Vertical Line Test",
+  "Features of Graphs, Domain, Range",
+  "Properties of Functions – Even vs Odd",
+  "Properties of Functions – Increasing vs Decreasing",
+  "Properties of Functions – Extrema",
+  "Average Rate of Change of a Function",
+  "How to Graph Piecewise Functions",
+  "Graphs You Must Know",
+  "Introduction to Graph Transformations",
+  "How to Graph with Transformations",
+  "Introduction to Solving Quadratics",
+  "The Square Root Method in Solving Quadratics",
+  "Using Factoring to Solve Quadratics",
+  "Completing the Square Made Easy",
+  "Proving the Quadratic Formula – Twice",
+  "Using the Quadratic Formula",
+  "Finding Intersections of Functions",
+  "Using Substitutions to Solve Equations",
+  "Graphing Quadratic Functions",
+  "Solving Quadratic Inequalities",
+  "Applications of Quadratic Functions",
+  "Introduction to Polynomial Functions",
+  "Power Functions",
+  "Multiplicity and End Behavior of Polynomials",
+  "Creating Polynomials from Real Zeros",
+  "How to Sketch Polynomial Functions",
+  "Synthetic Division and Long Division of Polynomials",
+  "Descartes Rule of Signs",
+  "How to Use the Rational Zeros Theorem",
+  "Introduction to Complex Solutions of Polynomials",
+  "Creating Polynomials from Complex Solutions",
+  "Finding ALL Solutions of Polynomials",
+  "Finding Vertical Asymptotes of Rational Functions",
+  "Graphing Rational Functions with Transformations",
+  "Finding a Horizontal Asymptote of a Rational Function",
+  "Finding an Oblique Asymptote of a Rational Function",
+  "Finding End Behavior of Rational Functions",
+  "Finding Asymptotes and Holes of Rational Functions",
+  "Graphing Rational Functions",
+  "Inequalities with Functions – Graphically",
+  "Inequalities with Polynomial Functions",
+  "Inequalities with Rational Functions",
+  "Composition of Functions",
+  "Finding Domain of Composite Functions",
+  "One to One Functions",
+  "Finding Inverse Functions",
+  "Graphs of Exponential Functions",
+  "Graphing Exponential Functions with Transformations",
+  "Solving Exponential Equations with Common Bases",
+  "Introduction to Logarithms and Their Graphs",
+  "Graphing Logarithms with Transformations",
+  "Introduction to Solving Logarithms and Exponentials",
+  "Properties of Logarithms",
+  "How to Expand Logarithms",
+  "How to Combine Logarithms",
+  "How to Change the Base of a Logarithm",
+  "Solving Logarithms with Common Bases",
+  "Solving Logarithmic Equations with Exponentials",
+  "Solving Exponential Equations with Logarithms",
+  "Review of Compound Interest",
+  "Exponential Growth and Decay",
+  "Introduction to Sequences",
+  "Introduction to Series and Summation Notation",
+  "Arithmetic Sequences",
+  "Arithmetic Series",
+  "Geometric Sequences",
+  "Geometric Series",
+  "Proof by Mathematical Induction",
+  // Trigonometry 1–42
+  "Introduction to Angles",
+  "Converting Degrees, Minutes, and Seconds",
+  "Introduction to Radians",
+  "Converting Radians and Degrees",
+  "Area of a Sector, Angular Velocity, Applications",
+  "Trigonometric Functions and the Unit Circle",
+  "How to Use the Unit Circle in Trigonometry",
+  "Basic Properties of Trigonometric Functions",
+  "Reciprocal Identities in Trigonometry",
+  "Pythagorean Identities for Trigonometric Functions",
+  "The Graphs of Sine and Cosine",
+  "Graphing Transformations with Sine and Cosine",
+  "How to Graph Tangent and Cotangent",
+  "Graphing Transformations with Tangent and Cotangent",
+  "How to Graph Cosecant and Secant",
+  "How to Graph Phase Shifts of Trigonometric Functions",
+  "Introduction to Inverse Trigonometric Functions",
+  "How to Use Inverse Trigonometric Functions",
+  "How to Find Inverse Trigonometric Functions",
+  "How to Solve Basic Inverse Trigonometric Functions",
+  "An In-Depth Look at Using Inverse Trig Functions",
+  "How to Solve Trigonometric Equations",
+  "Introduction to Using Trigonometric Identities",
+  "How to Prove Trigonometric Identities",
+  "Introduction to Sum and Difference Formulas in Trigonometry",
+  "Using Sum and Difference Formulas in Trigonometry",
+  "Proving the Double and Half Angle Formulas",
+  "How to Use the Double and Half Angle Formulas",
+  "How to Use Product to Sum and Sum to Product Formulas",
+  "Introduction to Right Triangle Trigonometry",
+  "Finding Sides and Angles with Right Triangle Trig",
+  "How to Use the Law of Sines",
+  "How to Use the Law of Cosines",
+  "How to Find the Area of a Triangle with Trigonometry",
+  "Simple Harmonic Motion in Trig",
+  "Introduction to Polar Coordinates",
+  "Converting Polar to Rectangular Coordinates",
+  "Converting Rectangular to Polar Coordinates",
+  "Converting Rectangular Equations to Polar",
+  "Converting Polar Equations to Rectangular",
+  "How to Graph Basic Polar Equations",
+  "How to Graph Advanced Polar Equations with Symmetry"
+];
+
+const PLAYLIST_ID = "PLDesaqWTN6ESsmwELdrzhcGiRhk5DjwLP";
+const TOTAL = 115;
+const BREAK = 73;
+const KEYS = ['forest','note','paper','distract','recall'];
+
+let vid = +localStorage.getItem('vid') || 1;
+
+// Per-video check storage: "checks_V{n}" = JSON array of 5 booleans
+function checksKey(v) { return `checks_V${v}`; }
+
+function loadChecks(v) {
+  return JSON.parse(localStorage.getItem(checksKey(v)) || '[false,false,false,false,false]');
+}
+
+function saveChecks(v, arr) {
+  localStorage.setItem(checksKey(v), JSON.stringify(arr));
+}
+
+function applyChecks() {
+  const checks = loadChecks(vid);
+  document.querySelectorAll('.item').forEach((el, i) => {
+    el.classList.toggle('done', !!checks[i]);
+  });
+  updateReady();
+}
+
+function toggle(el) {
+  el.classList.toggle('done');
+  const checks = [...document.querySelectorAll('.item')].map(e => e.classList.contains('done'));
+  saveChecks(vid, checks);
+  updateReady();
+}
+
+function updateReady() {
+  const items = document.querySelectorAll('.item');
+  const done = [...items].filter(e => e.classList.contains('done')).length;
+  const btn = document.getElementById('playlistBtn');
+  const hint = document.getElementById('hint');
+  if (done === items.length) {
+    btn.classList.add('ready');
+    hint.textContent = "you're ready — go learn something real ✓";
+  } else {
+    btn.classList.remove('ready');
+    hint.textContent = `${items.length - done} item${items.length - done !== 1 ? 's' : ''} left · complete the checklist`;
+  }
+}
+
+// Completed videos tracking (for progress ring)
+function getCompleted() {
+  return JSON.parse(localStorage.getItem('completed') || '[]');
+}
+function markComplete(v) {
+  const c = getCompleted();
+  if (!c.includes(v)) { c.push(v); localStorage.setItem('completed', JSON.stringify(c)); }
+}
+function updateRing() {
+  const done = getCompleted().length;
+  const pct = done / TOTAL;
+  const circ = 113.1;
+  document.getElementById('ringFg').style.strokeDashoffset = circ - (pct * circ);
+  document.getElementById('ringPct').textContent = Math.round(pct * 100) + '%';
+  document.getElementById('ringVids').textContent = `${done} of ${TOTAL} videos`;
+}
+
+function updateTracker() {
+  document.getElementById('videoDisplay').textContent = `Video ${vid} of ${TOTAL}`;
+  document.getElementById('videoTitle').textContent = VIDEOS[vid - 1];
+  document.getElementById('checkLabel').textContent = `Video ${vid}`;
+  document.getElementById('barFill').style.width = Math.max(0.9, ((vid - 1) / (TOTAL - 1)) * 100) + '%';
+  document.getElementById('phase').textContent = vid <= BREAK
+    ? '📐 College Algebra · Videos 1–73'
+    : '📐 Trigonometry · Videos 74–115';
+  localStorage.setItem('vid', vid);
+  applyChecks();
+  updateRing();
+}
+
+function changeVideo(dir) {
+  if (dir > 0) markComplete(vid);
+  vid = Math.max(1, Math.min(TOTAL, vid + dir));
+  updateTracker();
+  showToast(dir > 0 ? `✓ Done · Now on Video ${vid}` : `← Back to Video ${vid}`);
+}
+
+function openVideo(e) {
+  e.preventDefault();
+  // Deep link: youtube://www.youtube.com/playlist?list=ID&index=N (1-indexed)
+  const ytApp = `youtube://www.youtube.com/playlist?list=${PLAYLIST_ID}&index=${vid}`;
+  const ytWeb = `https://www.youtube.com/playlist?list=${PLAYLIST_ID}&index=${vid}`;
+  // Try app first, fallback to web after 500ms if app not installed
+  const start = Date.now();
+  window.location.href = ytApp;
+  setTimeout(() => {
+    if (Date.now() - start < 1500) window.open(ytWeb, '_blank');
+  }, 600);
+}
+
+function resetSession() {
+  saveChecks(vid, [false,false,false,false,false]);
+  applyChecks();
+  showToast('Session reset');
+}
+
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2200);
+}
+
+updateTracker();
+</script>
+</body>
+</html>
