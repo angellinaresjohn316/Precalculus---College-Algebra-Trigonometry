@@ -2,316 +2,163 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, user-scalable=no">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="apple-mobile-web-app-title" content="Study">
+<meta name="apple-mobile-web-app-title" content="Schedule">
 <title>Schedule</title>
 <style>
 @import url('https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Mono:wght@300;400;500&display=swap');
-
-:root {
-  --forest: #2d5a27;
-  --moss: #4a7c3f;
-  --leaf: #6fa651;
-  --canopy: #a8d08d;
-  --soil: #111409;
-  --paper: #f0ebe0;
+:root{
+  --moss:#4a7c3f;--leaf:#6fa651;--canopy:#a8d08d;--soil:#111409;--paper:#f0ebe0;
+  --run:#5b9bd5;--speed:#e0a23b;--rest:#8a8f82;
 }
-
-* { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
-
-body {
-  background: var(--soil);
-  color: var(--paper);
-  font-family: 'DM Mono', monospace;
-  min-height: 100dvh;
-  overflow-x: hidden;
-}
-
-.bg {
-  position:fixed; inset:0; z-index:0; overflow:hidden;
-  background:radial-gradient(ellipse at 50% -10%,#1e3d18 0%,#0a1208 55%,var(--soil) 100%);
-}
-.tree { position:absolute; bottom:0; background:#080c06; }
-.t1 { left:-3%; width:20%; height:48%; clip-path:polygon(50% 0%,12% 42%,24% 42%,4% 68%,20% 68%,0% 100%,100% 100%,80% 68%,96% 68%,76% 42%,88% 42%); }
-.t2 { right:-4%; width:24%; height:56%; clip-path:polygon(50% 0%,15% 40%,26% 40%,6% 66%,21% 66%,0% 100%,100% 100%,79% 66%,94% 66%,74% 40%,85% 40%); }
-
-.page { position:relative; z-index:10; min-height:100dvh; display:flex; flex-direction:column; padding:0 20px max(28px,env(safe-area-inset-bottom,16px)); }
-
-.header { padding-top:max(52px,env(safe-area-inset-top,24px)); text-align:center; animation:fadeDown .7s ease both; }
-@keyframes fadeDown { from{opacity:0;transform:translateY(-14px)} to{opacity:1;transform:translateY(0)} }
-.eyebrow { font-size:9px; letter-spacing:4px; text-transform:uppercase; color:var(--canopy); opacity:.6; margin-bottom:6px; }
-.title { font-family:'DM Serif Display',serif; font-size:clamp(30px,8vw,44px); line-height:1.05; }
-.title em { color:var(--canopy); font-style:italic; }
-
-.nav { display:flex; gap:8px; margin:18px 0 0; animation:fadeDown .7s .05s ease both; }
-.nav a { flex:1; text-align:center; padding:9px; border:1px solid rgba(168,208,141,.15); border-radius:10px; font-size:10px; letter-spacing:2px; text-transform:uppercase; color:var(--canopy); text-decoration:none; transition:all .2s; }
-.nav a.active { background:rgba(74,124,63,.2); border-color:rgba(168,208,141,.35); }
-.nav a:active { transform:scale(.97); }
-
-/* TODAY BANNER */
-.today-banner { margin:18px 0 0; border-radius:16px; padding:16px 18px; animation:fadeUp .7s .1s ease both; }
-@keyframes fadeUp { from{opacity:0;transform:translateY(14px)} to{opacity:1;transform:translateY(0)} }
-.today-banner.weekend { background:rgba(255,255,255,.03); border:1px solid rgba(168,208,141,.1); }
-.today-banner.weekday { background:linear-gradient(135deg,rgba(45,90,39,.3),rgba(10,18,8,.2)); border:1px solid rgba(111,166,81,.25); }
-.banner-top { display:flex; justify-content:space-between; align-items:baseline; margin-bottom:4px; }
-.banner-day { font-family:'DM Serif Display',serif; font-size:22px; color:var(--paper); }
-.banner-date { font-size:10px; color:var(--canopy); opacity:.5; }
-.banner-status { font-size:11px; color:var(--canopy); opacity:.6; margin-top:2px; }
-.banner-blocks { margin-top:12px; display:flex; flex-direction:column; gap:6px; }
-
-/* WEEK GRID */
-.section-label { font-size:9px; letter-spacing:3px; text-transform:uppercase; color:var(--canopy); opacity:.45; margin:20px 0 10px; }
-.week { display:flex; flex-direction:column; gap:8px; animation:fadeUp .7s .15s ease both; }
-
-.day-card { background:rgba(255,255,255,.025); border:1px solid rgba(168,208,141,.08); border-radius:14px; overflow:hidden; }
-.day-card.today-card { border-color:rgba(111,166,81,.3); background:rgba(45,90,39,.12); }
-.day-card.weekend-card { opacity:.45; }
-
-.day-header { display:flex; align-items:center; justify-content:space-between; padding:12px 14px 10px; cursor:pointer; -webkit-user-select:none; user-select:none; }
-.day-name { font-size:12px; letter-spacing:2px; text-transform:uppercase; color:var(--paper); }
-.day-card.today-card .day-name { color:var(--canopy); }
-.day-badge { font-size:9px; letter-spacing:1px; background:rgba(111,166,81,.18); color:var(--canopy); border-radius:100px; padding:3px 8px; }
-.day-toggle { color:var(--canopy); opacity:.4; font-size:14px; transition:transform .2s; }
-.day-card.open .day-toggle { transform:rotate(90deg); }
-
-.day-body { display:none; padding:0 14px 12px; }
-.day-card.open .day-body { display:block; }
-
-/* BLOCKS */
-.block { display:flex; align-items:stretch; gap:10px; margin-bottom:8px; }
-.block:last-child { margin-bottom:0; }
-.block-time { width:70px; flex-shrink:0; }
-.time-start { font-size:10px; color:var(--canopy); opacity:.7; }
-.time-end { font-size:9px; color:var(--canopy); opacity:.35; }
-.block-pill { flex:1; border-radius:8px; padding:9px 11px; border-left:2px solid transparent; }
-.block-pill.math { background:rgba(74,124,63,.2); border-left-color:var(--leaf); }
-.block-pill.run { background:rgba(30,80,160,.15); border-left-color:#5b9bd5; }
-.block-pill.rest { background:rgba(255,255,255,.04); border-left-color:rgba(168,208,141,.2); }
-.block-pill.work { background:rgba(160,120,30,.15); border-left-color:#d5a83b; }
-.pill-title { font-size:12px; color:var(--paper); margin-bottom:2px; }
-.pill-sub { font-size:9px; color:var(--canopy); opacity:.45; line-height:1.4; }
-
-/* EDIT MODE */
-.edit-btn { display:block; text-align:center; margin:14px 0 0; font-size:10px; color:var(--canopy); opacity:.3; cursor:pointer; letter-spacing:1px; }
-
-/* MODAL */
-.modal-overlay { position:fixed; inset:0; background:rgba(0,0,0,.7); z-index:200; display:none; align-items:flex-end; }
-.modal-overlay.open { display:flex; }
-.modal { background:#161d11; border:1px solid rgba(168,208,141,.15); border-radius:20px 20px 0 0; padding:24px 20px max(32px,env(safe-area-inset-bottom,20px)); width:100%; animation:slideUp .3s ease; }
-@keyframes slideUp { from{transform:translateY(100%)} to{transform:translateY(0)} }
-.modal-title { font-family:'DM Serif Display',serif; font-size:20px; color:var(--canopy); margin-bottom:4px; }
-.modal-sub { font-size:10px; color:var(--canopy); opacity:.4; margin-bottom:20px; letter-spacing:1px; }
-.field-label { font-size:9px; letter-spacing:3px; text-transform:uppercase; color:var(--canopy); opacity:.5; margin-bottom:6px; }
-.field-row { display:flex; gap:8px; margin-bottom:14px; }
-.time-input { flex:1; background:rgba(255,255,255,.05); border:1px solid rgba(168,208,141,.15); border-radius:10px; color:var(--paper); font-family:'DM Mono',monospace; font-size:13px; padding:11px 12px; -webkit-appearance:none; }
-.time-input:focus { outline:none; border-color:rgba(168,208,141,.4); }
-.modal-btns { display:flex; gap:8px; margin-top:6px; }
-.modal-btn { flex:1; padding:14px; border-radius:12px; font-family:'DM Mono',monospace; font-size:12px; letter-spacing:1px; cursor:pointer; border:none; transition:all .2s; }
-.modal-btn.cancel { background:rgba(255,255,255,.05); color:var(--canopy); }
-.modal-btn.save { background:var(--moss); color:var(--paper); }
-.modal-btn:active { transform:scale(.97); }
-
-.toast { position:fixed; bottom:max(32px,env(safe-area-inset-bottom,16px)); left:50%; transform:translateX(-50%) translateY(70px); background:var(--forest); border:1px solid var(--leaf); border-radius:100px; padding:10px 20px; font-size:11px; letter-spacing:1px; color:var(--canopy); white-space:nowrap; transition:transform .3s ease; z-index:300; }
-.toast.show { transform:translateX(-50%) translateY(0); }
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+body{background:var(--soil);color:var(--paper);font-family:'DM Mono',monospace;min-height:100dvh;overflow-x:hidden;}
+.bg{position:fixed;inset:0;z-index:0;background:radial-gradient(ellipse at 50% -10%,#1e3d18 0%,#0a1208 55%,var(--soil) 100%);}
+.tree{position:absolute;bottom:0;background:#080c06;}
+.t1{left:-3%;width:20%;height:46%;clip-path:polygon(50% 0%,12% 42%,24% 42%,4% 68%,20% 68%,0% 100%,100% 100%,80% 68%,96% 68%,76% 42%,88% 42%);}
+.t2{right:-4%;width:24%;height:54%;clip-path:polygon(50% 0%,15% 40%,26% 40%,6% 66%,21% 66%,0% 100%,100% 100%,79% 66%,94% 66%,74% 40%,85% 40%);}
+.page{position:relative;z-index:10;min-height:100dvh;display:flex;flex-direction:column;padding:0 18px max(28px,env(safe-area-inset-bottom));}
+.header{padding-top:max(50px,calc(env(safe-area-inset-top) + 22px));text-align:center;animation:fadeDown .6s ease both;}
+@keyframes fadeDown{from{opacity:0;transform:translateY(-12px)}to{opacity:1;transform:translateY(0)}}
+.eyebrow{font-size:9px;letter-spacing:4px;text-transform:uppercase;color:var(--canopy);opacity:.6;margin-bottom:5px;}
+.title{font-family:'DM Serif Display',serif;font-size:clamp(30px,8vw,42px);line-height:1.05;}
+.title em{color:var(--canopy);font-style:italic;}
+.nav{display:flex;gap:8px;margin:16px 0 0;animation:fadeDown .6s .05s ease both;}
+.nav a{flex:1;text-align:center;padding:9px;border:1px solid rgba(168,208,141,.15);border-radius:10px;font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--canopy);text-decoration:none;transition:all .2s;}
+.nav a.active{background:rgba(74,124,63,.2);border-color:rgba(168,208,141,.35);}
+.nav a:active{transform:scale(.97);}
+@keyframes fadeUp{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+/* TODAY */
+.today{margin:16px 0 0;border-radius:16px;padding:15px 16px;animation:fadeUp .6s .1s ease both;}
+.today.key{background:linear-gradient(135deg,rgba(224,162,59,.22),rgba(10,18,8,.2));border:1px solid rgba(224,162,59,.4);}
+.today.normal{background:linear-gradient(135deg,rgba(45,90,39,.3),rgba(10,18,8,.2));border:1px solid rgba(111,166,81,.25);}
+.today.rest{background:rgba(255,255,255,.03);border:1px solid rgba(168,208,141,.12);}
+.t-top{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:3px;}
+.t-day{font-family:'DM Serif Display',serif;font-size:21px;}
+.t-date{font-size:10px;color:var(--canopy);opacity:.5;}
+.t-focus{font-size:13px;color:var(--canopy);margin-top:8px;font-weight:500;}
+.t-sub{font-size:10px;color:var(--paper);opacity:.5;line-height:1.4;margin-top:3px;}
+.t-tags{display:flex;gap:6px;margin-top:11px;flex-wrap:wrap;}
+.tag{font-size:9px;letter-spacing:1px;padding:5px 9px;border-radius:100px;border:1px solid rgba(168,208,141,.2);color:var(--canopy);}
+.tag.on{background:rgba(74,124,63,.25);}
+/* FRAME */
+.frame{margin:11px 0 0;font-size:9.5px;letter-spacing:.5px;color:var(--canopy);opacity:.4;text-align:center;line-height:1.6;animation:fadeUp .6s .13s ease both;}
+/* WEEK */
+.label{font-size:9px;letter-spacing:3px;text-transform:uppercase;color:var(--canopy);opacity:.45;margin:20px 0 9px;}
+.week{display:flex;flex-direction:column;gap:6px;animation:fadeUp .6s .16s ease both;}
+.row{display:flex;align-items:center;gap:11px;background:rgba(255,255,255,.025);border:1px solid rgba(168,208,141,.07);border-radius:12px;padding:11px 13px;}
+.row.now{border-color:rgba(111,166,81,.4);background:rgba(45,90,39,.14);}
+.row.spd{border-color:rgba(224,162,59,.3);}
+.r-day{width:34px;flex-shrink:0;font-size:11px;letter-spacing:1px;color:var(--paper);opacity:.7;}
+.row.now .r-day{color:var(--canopy);opacity:1;}
+.dot{width:7px;height:7px;border-radius:50%;flex-shrink:0;}
+.dot.lower{background:var(--leaf);}.dot.upper{background:var(--leaf);}
+.dot.run{background:var(--run);}.dot.speed{background:var(--speed);}
+.dot.rest{background:var(--rest);}.dot.church{background:var(--canopy);opacity:.6;}
+.r-text{flex:1;min-width:0;}
+.r-focus{font-size:12px;color:var(--paper);}
+.row.spd .r-focus{color:var(--speed);font-weight:500;}
+.r-note{font-size:9px;color:var(--canopy);opacity:.42;line-height:1.3;margin-top:1px;}
+.r-study{font-size:8px;letter-spacing:.5px;color:var(--canopy);opacity:.5;flex-shrink:0;border:1px solid rgba(168,208,141,.18);border-radius:6px;padding:3px 6px;}
+/* COUNTDOWN */
+.counts{display:flex;gap:8px;margin:18px 0 0;animation:fadeUp .6s .19s ease both;}
+.count{flex:1;background:rgba(255,255,255,.025);border:1px solid rgba(168,208,141,.08);border-radius:12px;padding:12px 10px;text-align:center;}
+.c-num{font-family:'DM Serif Display',serif;font-size:26px;color:var(--canopy);line-height:1;}
+.c-label{font-size:8.5px;letter-spacing:1px;text-transform:uppercase;color:var(--paper);opacity:.45;margin-top:5px;line-height:1.3;}
+.foot{text-align:center;font-size:9px;color:var(--canopy);opacity:.3;letter-spacing:1px;margin:16px 0 0;}
 </style>
 </head>
 <body>
-<div class="bg">
-  <div class="tree t1"></div>
-  <div class="tree t2"></div>
-</div>
-
+<div class="bg"><div class="tree t1"></div><div class="tree t2"></div></div>
 <div class="page">
   <div class="header">
-    <div class="eyebrow">Summer 2026</div>
+    <div class="eyebrow">Summer 2026 · Internship Block</div>
     <div class="title"><em>Weekly</em> Plan</div>
   </div>
-
   <nav class="nav">
     <a href="index.html">Session</a>
     <a href="schedule.html" class="active">Schedule</a>
   </nav>
 
-  <div id="todayBanner" class="today-banner weekday"></div>
+  <div id="today" class="today normal"></div>
+  <div class="frame" id="frame"></div>
 
-  <div class="section-label">This Week</div>
+  <div class="label">Training Week</div>
   <div class="week" id="week"></div>
 
-  <span class="edit-btn" onclick="openModal()">✏ edit study times</span>
-</div>
+  <div class="label">Countdown</div>
+  <div class="counts" id="counts"></div>
 
-<!-- Edit Modal -->
-<div class="modal-overlay" id="modalOverlay" onclick="closeModal(event)">
-  <div class="modal">
-    <div class="modal-title">Study Times</div>
-    <div class="modal-sub">Applied Mon – Fri</div>
-    <div class="field-label">Pre-Calc Block</div>
-    <div class="field-row">
-      <input class="time-input" type="time" id="mathStart" value="09:00">
-      <input class="time-input" type="time" id="mathEnd" value="11:00">
-    </div>
-    <div class="field-label">Run / Training Block</div>
-    <div class="field-row">
-      <input class="time-input" type="time" id="runStart" value="06:30">
-      <input class="time-input" type="time" id="runEnd" value="07:30">
-    </div>
-    <div class="modal-btns">
-      <button class="modal-btn cancel" onclick="closeModalDirect()">Cancel</button>
-      <button class="modal-btn save" onclick="saveTimes()">Save</button>
-    </div>
-  </div>
+  <div class="foot">Speed Saturdays. Easy weekdays. Sleep is the workout you skip last.</div>
 </div>
-
-<div class="toast" id="toast"></div>
 
 <script>
-const DAYS = ['Monday','Tuesday','Wednesday','Thursday','Friday'];
-const SHORT = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
+// 0=Sun ... 6=Sat
+const PLAN={
+  1:{focus:'Lower Power + Accelerations',type:'lower',note:'Sprint mechanics + leg strength',study:1},
+  2:{focus:'Easy Aerobic Run',type:'run',note:'25–30 min · XC base',study:1},
+  3:{focus:'Upper + Core',type:'upper',note:'Pull · push · trunk',study:1},
+  4:{focus:'Strides + Easy Run',type:'run',note:'20 min + 5 strides',study:1},
+  5:{focus:'Rest / Mobility',type:'rest',note:'Recover for Saturday',study:0},
+  6:{focus:'SPEED DAY',type:'speed',note:'The session — done fresh, full effort',study:1,key:1},
+  0:{focus:'Church → Recovery',type:'church',note:'Rest, or a 20-min shakeout jog',study:1},
+};
+const ORDER=[1,2,3,4,5,6,0];
+const SHORT={1:'Mon',2:'Tue',3:'Wed',4:'Thu',5:'Fri',6:'Sat',0:'Sun'};
+const FULL={1:'Monday',2:'Tuesday',3:'Wednesday',4:'Thursday',5:'Friday',6:'Saturday',0:'Sunday'};
 
-function loadTimes() {
-  return {
-    mathStart: localStorage.getItem('mathStart') || '09:00',
-    mathEnd:   localStorage.getItem('mathEnd')   || '11:00',
-    runStart:  localStorage.getItem('runStart')  || '06:30',
-    runEnd:    localStorage.getItem('runEnd')    || '07:30',
-  };
-}
+const now=new Date();
+const dow=now.getDay();
+const p=PLAN[dow];
 
-function fmt(t) {
-  const [h,m] = t.split(':').map(Number);
-  const ampm = h >= 12 ? 'pm' : 'am';
-  return `${h%12||12}:${String(m).padStart(2,'0')} ${ampm}`;
-}
-
-function getToday() {
-  const d = new Date();
-  return d.getDay(); // 0=Sun,1=Mon...6=Sat
-}
-
-function getTodayName() {
-  const names = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
-  return names[new Date().getDay()];
-}
-
-function getDateStr() {
-  return new Date().toLocaleDateString('en-US', { month:'long', day:'numeric' });
-}
-
-function buildBlocks(times) {
-  return [
-    { type:'run',  start:times.runStart,  end:times.runEnd,  title:'🏃 Morning Run', sub:'XC fitness baseline — Coach Woods expects this' },
-    { type:'math', start:times.mathStart, end:times.mathEnd, title:'📐 Prof. Leonard', sub:'Pre-Calc video + Obsidian notes + recall' },
-    { type:'rest', start:'12:00', end:'13:00', title:'🍽 Lunch / Rest', sub:'Step away from screens' },
-  ];
-}
-
-function blockHTML(b) {
-  return `<div class="block">
-    <div class="block-time"><div class="time-start">${fmt(b.start)}</div><div class="time-end">${fmt(b.end)}</div></div>
-    <div class="block-pill ${b.type}">
-      <div class="pill-title">${b.title}</div>
-      <div class="pill-sub">${b.sub}</div>
-    </div>
+// Today card
+const t=document.getElementById('today');
+t.className='today '+(p.key?'key':(p.type==='rest'?'rest':'normal'));
+const studyLine = dow===6 ? 'Heavy study block — 2–3 videos' : (dow===0 ? 'Study PM — 1–2 videos' : (p.study?'Prof. Leonard tonight':'Light night — rest your head too'));
+t.innerHTML=`
+  <div class="t-top"><div class="t-day">${p.key?'🔑 ':''}${FULL[dow]}</div>
+  <div class="t-date">${now.toLocaleDateString('en-US',{month:'long',day:'numeric'})}</div></div>
+  <div class="t-focus">${p.focus}</div>
+  <div class="t-sub">${p.note}</div>
+  <div class="t-tags">
+    <span class="tag ${p.type!=='rest'?'on':''}">🏃 ${p.type==='rest'?'Rest':'Train'}</span>
+    <span class="tag ${p.study?'on':''}">📐 ${p.study?'Study':'Off'}</span>
   </div>`;
-}
 
-function render() {
-  const times = loadTimes();
-  const blocks = buildBlocks(times);
-  const todayDow = getToday(); // 0=Sun
-  const isWeekday = todayDow >= 1 && todayDow <= 5;
+// Frame line (weekday vs weekend context)
+const frame=document.getElementById('frame');
+frame.innerHTML = (dow>=1&&dow<=5)
+  ? 'Wake 4:20 · leave 5:00 · Onto 6:30–3:00 · home ~4:30 · session ~5:00 · sleep 9:00'
+  : (dow===0 ? 'Church AM · recovery + study PM · prep for the week tonight'
+             : 'Free morning — speed session fresh · big study block midday');
 
-  // Today banner
-  const banner = document.getElementById('todayBanner');
-  banner.className = 'today-banner ' + (isWeekday ? 'weekday' : 'weekend');
-  if (isWeekday) {
-    banner.innerHTML = `
-      <div class="banner-top">
-        <div class="banner-day">Today — ${getTodayName()}</div>
-        <div class="banner-date">${getDateStr()}</div>
-      </div>
-      <div class="banner-status">Study day. Here's your plan.</div>
-      <div class="banner-blocks">${blocks.map(blockHTML).join('')}</div>
-    `;
-  } else {
-    banner.innerHTML = `
-      <div class="banner-top">
-        <div class="banner-day">Today — ${getTodayName()}</div>
-        <div class="banner-date">${getDateStr()}</div>
-      </div>
-      <div class="banner-status" style="opacity:.5">Rest day. No study sessions on weekends.</div>
-    `;
-  }
+// Week
+const week=document.getElementById('week');
+week.innerHTML=ORDER.map(d=>{
+  const x=PLAN[d];
+  return `<div class="row ${d===dow?'now':''} ${x.key?'spd':''}">
+    <div class="r-day">${SHORT[d]}</div>
+    <div class="dot ${x.type}"></div>
+    <div class="r-text">
+      <div class="r-focus">${x.focus}</div>
+      <div class="r-note">${x.note}</div>
+    </div>
+    ${x.study?'<div class="r-study">📐</div>':''}
+  </div>`;
+}).join('');
 
-  // Week grid
-  const week = document.getElementById('week');
-  week.innerHTML = '';
-  DAYS.forEach((day, i) => {
-    const dow = i + 1; // Mon=1
-    const isToday = dow === todayDow;
-    const card = document.createElement('div');
-    card.className = 'day-card' + (isToday ? ' today-card' : '') + (isToday ? ' open' : '');
-
-    card.innerHTML = `
-      <div class="day-header" onclick="toggleDay(this.parentElement)">
-        <span class="day-name">${day}</span>
-        ${isToday ? '<span class="day-badge">today</span>' : ''}
-        <span class="day-toggle">›</span>
-      </div>
-      <div class="day-body">
-        ${blocks.map(blockHTML).join('')}
-      </div>
-    `;
-    week.appendChild(card);
-  });
-
-  // Weekend note
-  const wknd = document.createElement('div');
-  wknd.className = 'day-card weekend-card';
-  wknd.innerHTML = `<div class="day-header"><span class="day-name">Sat – Sun</span><span class="day-badge">rest</span></div>`;
-  week.appendChild(wknd);
-}
-
-function toggleDay(card) {
-  card.classList.toggle('open');
-}
-
-function openModal() {
-  const t = loadTimes();
-  document.getElementById('mathStart').value = t.mathStart;
-  document.getElementById('mathEnd').value   = t.mathEnd;
-  document.getElementById('runStart').value  = t.runStart;
-  document.getElementById('runEnd').value    = t.runEnd;
-  document.getElementById('modalOverlay').classList.add('open');
-}
-
-function closeModal(e) {
-  if (e.target === document.getElementById('modalOverlay')) closeModalDirect();
-}
-function closeModalDirect() {
-  document.getElementById('modalOverlay').classList.remove('open');
-}
-
-function saveTimes() {
-  localStorage.setItem('mathStart', document.getElementById('mathStart').value);
-  localStorage.setItem('mathEnd',   document.getElementById('mathEnd').value);
-  localStorage.setItem('runStart',  document.getElementById('runStart').value);
-  localStorage.setItem('runEnd',    document.getElementById('runEnd').value);
-  closeModalDirect();
-  render();
-  showToast('Times saved');
-}
-
-function showToast(msg) {
-  const t = document.getElementById('toast');
-  t.textContent = msg;
-  t.classList.add('show');
-  setTimeout(() => t.classList.remove('show'), 2000);
-}
-
-render();
+// Countdown
+function daysTo(y,m,d){const tgt=new Date(y,m-1,d);const a=new Date(now.getFullYear(),now.getMonth(),now.getDate());return Math.round((tgt-a)/86400000);}
+const counts=[
+  {n:daysTo(2026,8,15),l:'Move-In<br>Aug 15'},
+  {n:daysTo(2026,8,16),l:'Orientation<br>Aug 16'},
+  {n:daysTo(2026,8,28),l:'XC Report<br>Aug 28'},
+];
+document.getElementById('counts').innerHTML=counts.map(c=>
+  `<div class="count"><div class="c-num">${c.n<0?'✓':c.n}</div><div class="c-label">${c.l}</div></div>`
+).join('');
 </script>
 </body>
 </html>
